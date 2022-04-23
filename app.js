@@ -47,9 +47,13 @@ app.post('/register', async (req, res) => {
         expiresIn: '2h',
       },
     );
-    user.token = token;
 
-    return res.status(201).json(user);
+    const userResponse = {
+      userId: user._id,
+      token,
+    };
+
+    return res.status(201).json(userResponse);
   } catch (err) {
     console.log(err);
     return res.status(500);
@@ -72,9 +76,13 @@ app.post('/login', async (req, res) => {
           expiresIn: '2h',
         },
       );
-      user.token = token;
 
-      return res.status(200).json(user);
+      const userResponse = {
+        userId: user._id,
+        token,
+      };
+
+      return res.status(200).json(userResponse);
     }
     return res.status(400).send('Invalid credentials');
   } catch (err) {
@@ -83,6 +91,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-app.post('/dashboard', auth, (req, res) => res.status(200).send('I can let you go, you are logged in!'));
+app.post('/token', auth, (_req, res) => res.status(200).send('Valid token'));
 
 module.exports = app;
