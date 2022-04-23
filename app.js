@@ -1,10 +1,10 @@
 require('dotenv').config();
 require('./config/database').connect();
 
-const auth = require('./middleware/auth');
 const bcryptjs = require('bcryptjs');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const auth = require('./middleware/auth');
 const User = require('./model/user');
 
 const app = express();
@@ -13,7 +13,14 @@ app.use(express.json());
 
 app.post('/register', async (req, res) => {
   try {
-    const { email, password, firstName, lastName, city, dob } = req.body;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      city,
+      dob,
+    } = req.body;
     if (!(email && password && firstName && lastName && city && dob)) {
       return res.status(400).send('All input is required');
     }
@@ -31,22 +38,23 @@ app.post('/register', async (req, res) => {
       password: encryptedPassword,
       city,
       dob,
-    })
+    });
 
     const token = jwt.sign(
       { user_id: user._id, email },
       process.env.TOKEN_KEY,
       {
         expiresIn: '2h',
-      }
-    )
+      },
+    );
     user.token = token;
 
     return res.status(201).json(user);
   } catch (err) {
     console.log(err);
+    return res.status(500);
   }
-})
+});
 
 app.post('/login', async (req, res) => {
   try {
@@ -62,20 +70,19 @@ app.post('/login', async (req, res) => {
         process.env.TOKEN_KEY,
         {
           expiresIn: '2h',
-        }
-      )
+        },
+      );
       user.token = token;
-      
+
       return res.status(200).json(user);
     }
-    return res.status(400).send("Invalid credentials");
+    return res.status(400).send('Invalid credentials');
   } catch (err) {
     console.log(err);
+    return res.status(500);
   }
-})
+});
 
-app.post('/dashboard', auth, (req, res) => {
-  return res.status(200).send('I can let you go, you are logged in!');
-})
+app.post('/dashboard', auth, (req, res) => res.status(200).send('I can let you go, you are logged in!'));
 
 module.exports = app;
