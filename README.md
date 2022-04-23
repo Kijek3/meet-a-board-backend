@@ -1,0 +1,1 @@
+# Backend for Meet a Board project
