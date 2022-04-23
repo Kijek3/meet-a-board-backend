@@ -1,0 +1,15 @@
+name: Eslint
+on:
+  pull_request:
+    branches: [ master ]
+jobs:
+  lint:
+    name: Check lint rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Install modules
+        run: npm ci
+      - name: Eslint
+        run: npm run lint
