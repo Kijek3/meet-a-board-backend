@@ -76,7 +76,7 @@ exports.login = async (req, res) => {
 
       return res.status(200).json(userResponse);
     }
-    return res.status(400).send('Invalid credentials');
+    return res.status(401).send('Invalid credentials');
   } catch (err) {
     console.log(err);
     return res.status(500);
