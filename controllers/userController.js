@@ -20,5 +20,5 @@ exports.getUserInfoById = async (req, res) => {
     console.log(err);
     return res.status(500);
   }
-  return res.status(404).send('User don\'t exist');
+  return res.status(404).send('User doesn\'t exist');
 };
