@@ -114,6 +114,10 @@ exports.editMeeting = async (req, res, next) => {
       && city && address && isInPublicPlace && game)) {
       return res.status(400).send('All input is required');
     }
+    const check = await Meeting.findById(id);
+    if (req.user.user_id !== check.userId.toString()) {
+      return res.status(403).send('Forbidden');
+    }
     const editMeetingQuery = await Meeting.findOneAndUpdate(id, req.body);
     return res.status(200).json(editMeetingQuery);
   }).catch(next);
@@ -126,8 +130,6 @@ exports.deleteMeeting = async (req, res, next) => {
       return res.status(404).send('All input is required');
     }
     const check = await Meeting.findById(id);
-    console.log(req.user);
-    console.log(check.userId.toString());
     if (req.user.user_id !== check.userId.toString()) {
       return res.status(403).send('Forbidden');
     }
