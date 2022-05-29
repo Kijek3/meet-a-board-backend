@@ -28,40 +28,54 @@ exports.addMeeting = async (req, res) => {
   }
 };
 
-exports.getFutureMeetings = async (req, res) => {
+exports.getFutureMeetings = async (req, res, next) => {
   try {
-    const filters = { date: { $gte: new Date().toISOString() } };
+    const meetingsQuery = Meeting.find();
+    meetingsQuery.find({ date: { $gte: new Date().toISOString() } });
     if (req.body.filter?.search) {
-      // filters.search = req.body.filter.search;
-      filters.search = { $or: [{ title: `/${req.body.filter.search}/i` }, { 'game.$': `/${req.body.filter.search}/i` }] };
-      console.log(filters);
+      meetingsQuery.find({
+        $or: [
+          { title: { $regex: req.body.filter.search, $options: 'i' } },
+          { 'game.title': { $regex: req.body.filter.search, $options: 'i' } },
+        ],
+      });
     }
     if (req.body.filter?.minDate) {
-      filters.minDate = req.body.filter.minDate;
+      meetingsQuery.find({
+        date: { $gte: req.body.filter?.minDate },
+      });
     }
     if (req.body.filter?.maxDate) {
-      filters.maxDate = req.body.filter.maxDate;
+      meetingsQuery.find({
+        date: { $lte: req.body.filter?.maxDate },
+      });
     }
     if (req.body.filter?.minPlayers) {
-      filters.minPlayers = req.body.filter.minPlayers;
+      meetingsQuery.find({
+        minPlayers: { $gte: req.body.filter?.minPlayers },
+      });
     }
     if (req.body.filter?.maxPlayers) {
-      filters.maxPlayers = req.body.filter.maxPlayers;
+      meetingsQuery.find({
+        maxPlayers: { $lte: req.body.filter?.maxPlayers },
+      });
     }
     if (req.body.filter?.city) {
-      filters.city = req.body.filter.city;
+      meetingsQuery.find({
+        city: req.body.filter?.city,
+      });
     }
-    let sortBy = {};
+
+    const sortBy = { date: 1 };
     if (req.body.sortBy) {
       sortBy[req.body.sortBy.field] = req.body.sortBy.asc ? 1 : -1;
-    } else {
-      sortBy = { date: 1 };
     }
-    const meetings = await Meeting.find(filters).sort(sortBy);
+    meetingsQuery.sort(sortBy);
+
+    const meetings = await meetingsQuery.exec();
     return res.status(200).json(meetings);
   } catch (err) {
-    console.log(err);
-    return res.status(500);
+    return next(err);
   }
 };
 
