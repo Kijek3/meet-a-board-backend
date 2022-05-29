@@ -125,6 +125,12 @@ exports.deleteMeeting = async (req, res, next) => {
     if (!id) {
       return res.status(404).send('All input is required');
     }
+    const check = await Meeting.findById(id);
+    console.log(req.user);
+    console.log(check.userId.toString());
+    if (req.user.user_id !== check.userId.toString()) {
+      return res.status(403).send('Forbidden');
+    }
     const removedMeeting = await Meeting.findOneAndDelete(id);
     return res.status(200).json(removedMeeting);
   }).catch(next);
