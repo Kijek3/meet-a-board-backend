@@ -21,12 +21,15 @@
   },
   "homepage": "https://github.com/Kijek3/meet-a-board-backend#readme",
   "dependencies": {
+    "axios": "^0.27.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-xml-bodyparser": "^0.3.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.3.1"
+    "mongoose": "^6.3.1",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "eslint": "^8.14.0",
