@@ -95,3 +95,37 @@ exports.getMeeting = async (req, res) => {
     return res.status(500);
   }
 };
+
+exports.editMeeting = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.params.meetingId;
+    const {
+      userId,
+      title,
+      date,
+      startHour,
+      endHour,
+      city,
+      address,
+      isInPublicPlace,
+      game,
+    } = req.body;
+    if (!(userId && title && date && startHour && endHour
+      && city && address && isInPublicPlace && game)) {
+      return res.status(400).send('All input is required');
+    }
+    const editMeetingQuery = await Meeting.findOneAndUpdate(id, req.body);
+    return res.status(200).json(editMeetingQuery);
+  }).catch(next);
+};
+
+exports.deleteMeeting = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.params.meetingId;
+    if (!id) {
+      return res.status(404).send('All input is required');
+    }
+    const removedMeeting = await Meeting.findOneAndDelete(id);
+    return res.status(200).json(removedMeeting);
+  }).catch(next);
+};
