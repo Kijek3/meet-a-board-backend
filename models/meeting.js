@@ -3,7 +3,7 @@ const Game = require('./game');
 
 const meetingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  guests: { type: [{ userId: mongoose.Schema.Types.ObjectId }] },
+  guests: { type: [{ userId: mongoose.Schema.Types.ObjectId, isAccepted: Boolean }] },
   title: { type: String, required: true },
   date: { type: String, required: true },
   startHour: { type: String, required: true },

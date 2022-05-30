@@ -7,6 +7,7 @@ exports.userSchema = new mongoose.Schema({
   lastName: { type: String },
   city: { type: String },
   dob: { type: String },
+  description: String,
 });
 
 module.exports = mongoose.model('user', this.userSchema);
