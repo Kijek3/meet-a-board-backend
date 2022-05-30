@@ -135,3 +135,11 @@ exports.deleteMeeting = async (req, res, next) => {
     return res.status(200).json(removedMeeting);
   }).catch(next);
 };
+
+exports.getUserMeetings = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.user.user_id;
+    const userAllMeetings = await Meeting.find({ userId: id });
+    return res.status(200).json(userAllMeetings);
+  }).catch(next);
+};
