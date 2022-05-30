@@ -7,6 +7,6 @@ const libraryController = require('../controllers/libraryController');
 router.post('', auth, libraryController.searchGame);
 router.put('', auth, libraryController.addGameToLibrary);
 router.get('', auth, libraryController.getLibrary);
-router.delete('', auth, libraryController.deleteGameFromLibrary);
+router.delete('/:gameId', auth, libraryController.deleteGameFromLibrary);
 
 module.exports = router;
