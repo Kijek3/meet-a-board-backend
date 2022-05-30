@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 exports.commentSchema = new mongoose.Schema({
-  userId: { type: Number, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   meetingId: { type: String, required: true },
   content: { type: String, required: true },
   date: { type: String, required: true },
