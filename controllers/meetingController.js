@@ -18,9 +18,7 @@ exports.addMeeting = async (req, res) => {
       && city && address && isInPublicPlace && game)) {
       return res.status(400).send('All input is required');
     }
-    const meeting = await Meeting.create(
-      req.body,
-    );
+    const meeting = await Meeting.create(req.body);
     return res.status(201).json(meeting);
   } catch (err) {
     console.log(err);
@@ -122,7 +120,7 @@ exports.editMeeting = async (req, res, next) => {
 exports.deleteMeeting = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
-    if (!id) {
+    if (!mongoose.isValidObjectId(id)) {
       return res.status(404).send('All input is required');
     }
     const check = await Meeting.findById(id);
@@ -143,3 +141,9 @@ exports.getUserMeetings = async (req, res, next) => {
     return res.status(200).json(userAllMeetings);
   }).catch(next);
 };
+
+// endpoint do wydarzen, w ktorych dany uzytkownik bierze udzial
+// lista gosci wydarzenia
+// dołączanie do ogłoszeń (działa dwufazowo) - pending false, acc true, rejected
+// getMeeting - ma zwracac malo info, chyba, ze ktos jest uczestnikiem albo organizatorem
+// wiecej detali dopiero, gdy jest zaakceptowany (boolean === true)
