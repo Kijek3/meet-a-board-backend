@@ -30,6 +30,9 @@ exports.searchGame = async (req, res, next) => {
                     id: game.id[0],
                     title: game.name[0].value[0],
                     thumbnail: game.thumbnail ? game.thumbnail[0] : null,
+                    minPlayers: game.minplayers ? game.minplayers[0]?.value[0] : null,
+                    maxPlayers: game.maxplayers ? game.maxplayers[0]?.value[0] : null,
+                    playingTime: game.playingtime ? game.playingtime[0]?.value[0] : null,
                   });
                 });
                 return res.status(200).json(gamesList);

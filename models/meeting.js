@@ -13,8 +13,6 @@ const meetingSchema = new mongoose.Schema({
   isInPublicPlace: { type: Boolean, required: true },
   game: { type: Game.schema, required: true },
   description: String,
-  minPlayers: Number,
-  maxPlayers: Number,
   gameLanguage: String,
 });
 
