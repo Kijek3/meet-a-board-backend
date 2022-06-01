@@ -4,7 +4,6 @@ const Meeting = require('../models/meeting');
 exports.addMeeting = async (req, res) => {
   try {
     const {
-      userId,
       title,
       date,
       startHour,
@@ -14,11 +13,15 @@ exports.addMeeting = async (req, res) => {
       isInPublicPlace,
       game,
     } = req.body;
-    if (!(userId && title && date && startHour && endHour
-      && city && address && isInPublicPlace && game)) {
+    if (!(title && date && startHour && endHour
+      && city && address && isInPublicPlace !== null && game)) {
       return res.status(400).send('All input is required');
     }
-    const meeting = await Meeting.create(req.body);
+    const data = {
+      ...req.body,
+      userId: req.user.user_id,
+    };
+    const meeting = await Meeting.create(data);
     return res.status(201).json(meeting);
   } catch (err) {
     console.log(err);
@@ -97,22 +100,7 @@ exports.getMeeting = async (req, res) => {
 exports.editMeeting = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
-    const {
-      userId,
-      title,
-      date,
-      startHour,
-      endHour,
-      city,
-      address,
-      isInPublicPlace,
-      game,
-    } = req.body;
-    if (!(userId && title && date && startHour && endHour
-      && city && address && isInPublicPlace && game)) {
-      return res.status(400).send('All input is required');
-    }
-    const editMeetingQuery = await Meeting.findOneAndUpdate(id, req.body);
+    const editMeetingQuery = await Meeting.findOneAndUpdate({ _id: id }, req.body);
     return res.status(200).json(editMeetingQuery);
   }).catch(next);
 };
