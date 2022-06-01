@@ -72,7 +72,7 @@ exports.getFutureMeetings = async (req, res, next) => {
       sortBy[req.body.sortBy.field] = req.body.sortBy.asc ? 1 : -1;
     }
     meetingsQuery.sort(sortBy);
-
+    meetingsQuery.select('-address -guests');
     const meetings = await meetingsQuery.exec();
     return res.status(200).json(meetings);
   } catch (err) {
@@ -84,11 +84,22 @@ exports.getMeeting = async (req, res) => {
   try {
     const id = req.params.meetingId;
     if (!mongoose.isValidObjectId(id)) {
-      return res.status(404).json({ message: 'Meeting ID must be valid' });
+      return res.status(404).send('Meeting ID must be valid');
     }
     const meeting = await Meeting.findById(id);
     if (meeting === null) {
-      return res.status(404).json({ message: 'Meeting not found' });
+      return res.status(404).send('Meeting ID must be valid');
+    }
+    let userAccepted = false;
+    for (let i = 0; i < meeting.guests.length; i += 1) {
+      const meetingAuthor = meeting.guests[i].userId.toString();
+      if (meetingAuthor === req.user.user_id && meeting.guests[i].isAccepted) {
+        userAccepted = true;
+      }
+    }
+    if (req.user.user_id !== meeting.userId.toString() && !userAccepted) {
+      meeting.address = null;
+      meeting.guests = null;
     }
     return res.status(200).json(meeting);
   } catch (err) {
@@ -100,6 +111,10 @@ exports.getMeeting = async (req, res) => {
 exports.editMeeting = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
+    const check = await Meeting.findById(id);
+    if (req.user.user_id !== check.userId.toString()) {
+      return res.status(403).send('Forbidden');
+    }
     const editMeetingQuery = await Meeting.findOneAndUpdate({ _id: id }, req.body);
     return res.status(200).json(editMeetingQuery);
   }).catch(next);
@@ -130,8 +145,65 @@ exports.getUserMeetings = async (req, res, next) => {
   }).catch(next);
 };
 
-// endpoint do wydarzen, w ktorych dany uzytkownik bierze udzial
-// lista gosci wydarzenia
-// dołączanie do ogłoszeń (działa dwufazowo) - pending false, acc true, rejected
+exports.getJoinedMeetings = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.user.user_id;
+    const joinedMeetings = await Meeting.find({ 'guests.userId': id });
+    return res.status(200).json(joinedMeetings);
+  }).catch(next);
+};
+
+exports.joinMeeting = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.params.meetingId;
+    const meeting = await Meeting.findById(id);
+    for (let i = 0; i < meeting.guests.length; i += 1) {
+      if (meeting.guests[i].userId.toString() === req.user.user_id) {
+        return res.status(409).send('User already joined a meeting');
+      }
+    }
+    meeting.guests.push({ userId: req.user.user_id, isAccepted: false });
+    const updated = await Meeting.findOneAndUpdate({ _id: id }, { guests: meeting.guests });
+    return res.status(200).json(updated);
+  }).catch(next);
+};
+
+exports.acceptGuest = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.params.meetingId;
+    const meeting = await Meeting.findById(id);
+    if (req.user.user_id !== meeting.userId.toString()) {
+      return res.status(403).send('Forbidden');
+    }
+    const mapped = meeting.guests.map((guest) => {
+      const newGuest = guest;
+      if (guest.userId.toString() === req.body.userId) {
+        newGuest.isAccepted = true;
+      }
+      return newGuest;
+    });
+    const updated = await Meeting.findOneAndUpdate({ _id: id }, { guests: mapped });
+    return res.status(200).json(updated);
+  }).catch(next);
+};
+
+exports.deleteGuest = async (req, res, next) => {
+  Promise.resolve().then(async () => {
+    const id = req.params.meetingId;
+    const meeting = await Meeting.findById(id);
+    if (req.user.user_id !== meeting.userId.toString()) {
+      return res.status(403).send('Forbidden');
+    }
+    const filtered = meeting.guests.filter((guest) => guest.userId.toString() !== req.body.userId);
+    const updated = await Meeting.findOneAndUpdate({ _id: id }, { guests: filtered });
+    return res.status(200).json(updated);
+  }).catch(next);
+};
+
+// POTESTOWAC KOMENTARZE
+// KURWA ZMIEN BRANCHA DEBILU JEBANY
+// endpoint do wydarzen, w ktorych dany uzytkownik bierze udzial +
+// lista gosci wydarzenia +
+// dołączanie do ogłoszeń (działa dwufazowo) - pending false, acc true, rejected +
 // getMeeting - ma zwracac malo info, chyba, ze ktos jest uczestnikiem albo organizatorem
 // wiecej detali dopiero, gdy jest zaakceptowany (boolean === true)
