@@ -66,7 +66,6 @@ exports.deleteUser = async (req, res, next) => {
       return res.status(403).send('Forbidden');
     }
     const removedUser = await User.findOneAndRemove({ _id: id });
-    console.log(removedUser);
     return res.status(200).json(removedUser);
   }).catch(next);
 };
