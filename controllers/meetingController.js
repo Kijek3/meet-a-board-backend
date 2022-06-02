@@ -53,12 +53,12 @@ exports.getFutureMeetings = async (req, res, next) => {
     }
     if (req.body.filter?.minPlayers) {
       meetingsQuery.find({
-        minPlayers: { $gte: req.body.filter?.minPlayers },
+        'game.minPlayers': { $gte: req.body.filter?.minPlayers },
       });
     }
     if (req.body.filter?.maxPlayers) {
       meetingsQuery.find({
-        maxPlayers: { $lte: req.body.filter?.maxPlayers },
+        'game.maxPlayers': { $lte: req.body.filter?.maxPlayers },
       });
     }
     if (req.body.filter?.city) {
@@ -67,9 +67,11 @@ exports.getFutureMeetings = async (req, res, next) => {
       });
     }
 
-    const sortBy = { date: 1 };
+    const sortBy = {};
     if (req.body.sortBy) {
       sortBy[req.body.sortBy.field] = req.body.sortBy.asc ? 1 : -1;
+    } else {
+      sortBy.date = 1;
     }
     meetingsQuery.sort(sortBy);
     meetingsQuery.select('-address -guests');
@@ -130,8 +132,6 @@ exports.deleteMeeting = async (req, res, next) => {
       return res.status(404).send('All input is required');
     }
     const check = await Meeting.findById(id);
-    console.log(req.user);
-    console.log(check.userId.toString());
     if (req.user.user_id !== check.userId.toString()) {
       return res.status(403).send('Forbidden');
     }
@@ -198,16 +198,19 @@ exports.acceptGuest = async (req, res, next) => {
 
 exports.deleteGuest = async (req, res, next) => {
   Promise.resolve().then(async () => {
-    const id = req.params.meetingId;
-    if (!mongoose.isValidObjectId(id)) {
+    const {
+      meetingId,
+      guestId,
+    } = req.params;
+    if (!mongoose.isValidObjectId(meetingId)) {
       return res.status(404).send('Meeting ID must be valid');
     }
-    const meeting = await Meeting.findById(id);
+    const meeting = await Meeting.findById(meetingId);
     if (req.user.user_id !== meeting.userId.toString()) {
       return res.status(403).send('Forbidden');
     }
-    const filtered = meeting.guests.filter((guest) => guest.userId.toString() !== req.body.userId);
-    const updated = await Meeting.findOneAndUpdate({ _id: id }, { guests: filtered });
+    const filtered = meeting.guests.filter((guest) => guest.userId.toString() !== guestId);
+    const updated = await Meeting.findOneAndUpdate({ _id: meetingId }, { guests: filtered });
     return res.status(200).json(updated);
   }).catch(next);
 };
