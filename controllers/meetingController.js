@@ -132,7 +132,7 @@ exports.deleteMeeting = async (req, res, next) => {
     if (req.user.user_id !== check.userId.toString()) {
       return res.status(403).send('Forbidden');
     }
-    const removedMeeting = await Meeting.findOneAndDelete(id);
+    const removedMeeting = await Meeting.findOneAndDelete({ _id: id });
     return res.status(200).json(removedMeeting);
   }).catch(next);
 };
