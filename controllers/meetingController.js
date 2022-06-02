@@ -111,6 +111,9 @@ exports.getMeeting = async (req, res) => {
 exports.editMeeting = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).send('Meeting ID must be valid');
+    }
     const check = await Meeting.findById(id);
     if (req.user.user_id !== check.userId.toString()) {
       return res.status(403).send('Forbidden');
@@ -156,6 +159,9 @@ exports.getJoinedMeetings = async (req, res, next) => {
 exports.joinMeeting = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).send('Meeting ID must be valid');
+    }
     const meeting = await Meeting.findById(id);
     for (let i = 0; i < meeting.guests.length; i += 1) {
       if (meeting.guests[i].userId.toString() === req.user.user_id) {
@@ -171,6 +177,9 @@ exports.joinMeeting = async (req, res, next) => {
 exports.acceptGuest = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).send('Meeting ID must be valid');
+    }
     const meeting = await Meeting.findById(id);
     if (req.user.user_id !== meeting.userId.toString()) {
       return res.status(403).send('Forbidden');
@@ -190,6 +199,9 @@ exports.acceptGuest = async (req, res, next) => {
 exports.deleteGuest = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.meetingId;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).send('Meeting ID must be valid');
+    }
     const meeting = await Meeting.findById(id);
     if (req.user.user_id !== meeting.userId.toString()) {
       return res.status(403).send('Forbidden');
