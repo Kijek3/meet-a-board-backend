@@ -35,6 +35,9 @@ exports.editUserInfo = async (req, res, next) => {
       city,
       dob,
     } = req.body;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).send('Invalid userId');
+    }
     if (!(email && password && firstName && lastName && city && dob)) {
       return res.status(400).send('All input is required');
     }
@@ -58,15 +61,15 @@ exports.editUserInfo = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
   Promise.resolve().then(async () => {
     const id = req.params.userId;
-    if (!id) {
-      return res.status(404).send('All input is required');
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).send('All input is required');
     }
     const check = await User.findById(id);
     if (req.user.user_id !== check._id.toString()) {
       return res.status(403).send('Forbidden');
     }
     const removedUser = await User.findOneAndRemove({ _id: id });
-    console.log(removedUser);
+    // console.log(removedUser);
     return res.status(200).json(removedUser);
   }).catch(next);
 };

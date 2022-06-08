@@ -9,10 +9,13 @@ exports.addComment = async (req, res, next) => {
       content,
       date,
     } = req.body;
+    console.log(req.body);
     if (!(userId && meetingId && content && date)) {
       return res.status(404).send('All input is required');
     }
-    // dodac jakas walidacje danych // TODO
+    if (req.user.user_id !== userId.toString()) {
+      return res.status(403).send('Forbidden');
+    }
     const comment = await Comment.create(req.body);
     return res.status(201).json(comment);
   }).catch(next);
